@@ -48,7 +48,7 @@ install_using_pip() {
     pip install $1 >&2 > /dev/null
 }
 
-seupt_pip3_as_default() {
+setup_pip3_as_default() {
     local pip_path=$(package_check pip)
     local pip3_path=$(package_check pip3)
     if [ "$pip_path" == "$pip3_path" ]; then
@@ -58,7 +58,7 @@ seupt_pip3_as_default() {
     ln -s $pip3_path $pip_path
 }
 
-seupt_python3_as_default() {
+setup_python3_as_default() {
     local python_path=$(package_check python)
     local python3_path=$(package_check python3)
     if [ "$python_path" == "$python3_path" ]; then
@@ -69,8 +69,8 @@ seupt_python3_as_default() {
 }
 
 
-seupt_python3_as_default
-seupt_pip3_as_default
+setup_python3_as_default
+setup_pip3_as_default
 
 
 ### install virtualenev and virtualenvwrapper
