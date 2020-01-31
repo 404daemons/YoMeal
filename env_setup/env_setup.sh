@@ -20,8 +20,10 @@ else
 fi
 
 install_virt_pckgs() {
-    pip3 install virtualenv >&2 > /dev/null
-    pip3 install virtualenvwrapper >&2 > /dev/null
+    succ_msg="Installed virtualenv"
+    failure_msg=""
+    pip3 install virtualenv >&2 > /dev/null && pip install virtualenv >&2 > /dev/null && echo -e "$COL_GREEN Installed virtualenv $RST" || echo -e "$COL_RED Failed to install virtualenv$RST"
+    pip3 install virtualenvwrapper >&2 > /dev/null && pip install virtualenvwrapper >&2 > /dev/null && echo -e "$COL_GREEN Installed virtualenvwrapper $RST" || echo -e "$COL_RED Failed to install virtualenvwrapper$RST"
 }
 
 
@@ -55,16 +57,18 @@ else
 fi
 
 Contents=""
-if [ "$(echo $VIRTUALENV_PYTHON)" != "$(which python)" ]; then
-    Contents+="export VIRTUALENV_PYTHON=/usr/local/bin/python3 \n"
+if [ "$(echo $VIRTUALENV_PYTHON)" != "$(which python3)" ]; then
+    Contents+="export VIRTUALENV_PYTHON=$(which python3) \n"
 fi
+
+
 if [ "$(echo $WORKON_HOME)" != "$HOME/Envs" ]; then
     Contents+="export WORKON_HOME=~/Envs \n"
     mkdir -p $HOME/Envs
 fi
 
 if [ "$Contents" != "" ];then
-    Contents+="source /usr/local/bin/virtualenvwrapper.sh\n"
+    Contents+="source $(which python3)/virtualenvwrapper.sh\n"
     add_virtualenvwrppaer_env_var $PROFILE_FILE "\n\n$Contents"
     # add_virtualenvwrppaer_env_var $a "\n\n$Contents"
 fi
@@ -79,23 +83,21 @@ select yn in "Yes" "No"; do
         No ) echo -e "You selected \"NO\" so you have to create the virtualenv and install all the dependecies and libs with the required versions"; exit;;
     esac
 done
-# Creating and activating virtual env
-export VIRTUALENV_PYTHON=/usr/local/bin/python3
-export WORKON_HOME=~/Envs
-source /usr/local/bin/virtualenvwrapper.sh
+
+# creating virtualenv using virtualenvwrapper
 mkvirtualenv yomeal >&2 > /dev/null
 echo "$COL_GREEN -- new virtualenv named \"yomeal\" has been created$RST --"
+# Installing dependencies/libs in the virtualenv
 workon yomeal
-# Installing dependencies/libs
-requirements_file="$(echo $PWD)/requirements.txt"
+requirements_file="$PWD/requirements.txt"
 if [ -f "$requirements_file" ]; then
     echo "$requirements_file exist; so installing the requirements"
     pip3 install -r $requirements_file >&2 > /dev/null
 fi
 
 echo -e "\n\n$COL_GREEN!!!!!!!!!!!!!!!!!!! Completed !!!!!!!!!!!!!!!!!!!$RST\n\n"
-echo -e "$COL_RED Confirm Folloiwng steps before moving further$RST"
+echo -e "$COL_GREEN Confirm Folloiwng steps before moving further$RST"
 echo -e "$COL_YELLOW - Make Sure your virtualenv has been created. You can confirm by going into \'~/Envs/\' and confirm if \"yomeal\" dir exists."
 echo -e "$COL_YELLOW - Execute \'source ~/.zsh_rc\' or \'source ~/.bash_profile\' or close&reopen terminal"
 echo -e "$COL_YELLOW - Goto your project directory and confimr if you are able to access the virtual env by executing \'workon yomeal\'"
-echo -e "$COL_YELLOW - If you require pre_setup.sh or not"
+echo -e "$COL_YELLOW - If you require pre_setup.sh or not$RST"
