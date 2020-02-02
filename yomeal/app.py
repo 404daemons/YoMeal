@@ -1,12 +1,13 @@
 from flask import Flask, request
-from sms_handler import handler
+from sms_handler.handler import SMS
 app = Flask(__name__)
 
 
 @app.route("/sms", methods=['GET', 'POST'])
 def sms_handler_route():
+    sms = SMS()
     if request.method == 'POST':
-        return handler.read_sms(request.form)
+        return sms.readSMS(request.form)
     else:
         return "Wrong method"
 
