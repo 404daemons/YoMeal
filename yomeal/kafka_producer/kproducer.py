@@ -12,8 +12,8 @@ class KProducer():
             # TODO: log error and maybe create seprate condition for msg check
             return ""
         self._p.produce(
-            self.topic, 
-            msg.encode('utf-8'), 
+            self.topic,
+            msg.encode('utf-8'),
             callback=self.delivery_report
             )
         return ""

@@ -11,8 +11,11 @@ class SMS():
         # TODO: Call parser to parse the message and
         #       detect which kafka topic needs to be selected
         # Following will be msg body
-        msg_content = msg['Body']
-        self.__pushToKafka(msg_content, "test")
+        msgContent = {}
+        msgContent["body"] = msg['Body']
+        msgContent["from"] = msg['From']
+        msgContent["MessageSid"] = msg['MessageSid']
+        self.__pushToKafka(msgContent, "test")
         return ""
 
     def __pushToKafka(self, msg, topic):
