@@ -13,7 +13,7 @@ services:
     hostname: kafka
     environment:
       # TODO: update topics/patitions/replicas
-      KAFKA_CREATE_TOPICS: "UploadFile:1:1,GetFile:1:1,TrackUpload:1:1,GetEmailContent:1:1" # topic:partition:replicas
+      KAFKA_CREATE_TOPICS: "nutritions:1:1,routine:1:1,retrieval:1:1,unknown:1:1" # topic:partition:replicas
       KAFKA_ADVERTISED_HOST_NAME: kafka # docker-machine ip
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_PORT: 9092
@@ -35,5 +35,6 @@ services:
     #     - ./yomeal:/code
     depends_on:
         - redis
+        # - kafka
   redis:
       image: redis
