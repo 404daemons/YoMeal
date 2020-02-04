@@ -3,7 +3,11 @@
 .AppleDouble
 .LSOverride
 
+###
+.vscode/
+
+
 ### Binary
 *.pyc
-# __pycache__/
-#.pytest_cache/
+__pycache__/
+.pytest_cache/
