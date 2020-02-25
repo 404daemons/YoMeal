@@ -2,20 +2,21 @@ import datetime
 import json
 import logging
 import os
-from datetime import datetime
 
 from db_models import Activity
 from flask import Flask, jsonify, request
 from flask_mongoengine import MongoEngine
-from mongoengine.queryset.visitor import Q
+from mongoengine.queryset.visitor import Q as MongoQuery
 
 DATE_FMT = '%Y-%m-%d %H:%M:%S'
 
 log = logging.getLogger()
-logging.basicConfig(filename="models/mongo.log", filemode='a',
+app_dir = os.path.dirname(os.path.abspath(__file__))
+logging.basicConfig(filename=os.path.join(app_dir, 'mongo.app.log'),
+                    filemode='a',
                     format='%(asctime)s, %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+                    datefmt='%H:%M:%S', level=logging.DEBUG)
+
 
 app = Flask(__name__)
 
@@ -47,27 +48,37 @@ def add_activity():
     return jsonify(status=200, message=msg, data=[])
 
 
-@app.route('/activity/<int:ph_no>')
+@app.route('/activity/<int:ph_no>', methods=['POST'])
 def get_activity(ph_no):
     data_dict = request.get_json(force=True)
-    filters = Q(phone_no=ph_no)
+    filters = MongoQuery(phone_no=ph_no)
     if 'start_date' in data_dict:
+        _start_date = None
         try:
             _start_date = datetime.strptime(data_dict['start_date'], DATE_FMT)
         except ValueError:
-            _start_date = datetime.strptime(data_dict['start_date'] +
-                                            " 00:00:00", DATE_FMT)
+            try:
+                _start_date = datetime.strptime(data_dict['start_date'] +
+                                                " 00:00:00", DATE_FMT)
+            except:
+                pass
         finally:
-            filters = filters & Q(recorded_at__gt=_start_date)
+            if _start_date:
+                filters = filters & MongoQuery(recorded_at__gt=_start_date)
 
     if 'end_date' in data_dict:
+        _end_date = None
         try:
             _end_date = datetime.strptime(data_dict['end_date'], DATE_FMT)
         except ValueError:
-            _end_date = datetime.strptime(data_dict['end_date'] +
-                                          " 23:59:59", DATE_FMT)
+            try:
+                _end_date = datetime.strptime(data_dict['end_date'] +
+                                              " 23:59:59", DATE_FMT)
+            except:
+                pass
         finally:
-            filters = filters & Q(recorded_at__lt=_end_date)
+            if _end_date:
+                filters = filters & MongoQuery(recorded_at__lt=_end_date)
     log.debug(filters)
     _activities = Activity.objects(filters)
     msg = 'User#{} fetched {} activities.'.format(ph_no, len(_activities))
@@ -79,26 +90,36 @@ def get_activity(ph_no):
 def get_summary_activity(ph_no, value):
     data_dict = request.get_json()
     rtn_dict = dict()
-    filters = Q(phone_no=ph_no)
+    filters = MongoQuery(phone_no=ph_no)
     if 'start_date' in data_dict:
+        _start_date = None
         try:
             _start_date = datetime.strptime(data_dict['start_date'], DATE_FMT)
         except ValueError:
-            _start_date = datetime.strptime(data_dict['start_date'] +
-                                            " 00:00:00", DATE_FMT)
+            try:
+                _start_date = datetime.strptime(data_dict['start_date'] +
+                                                " 00:00:00", DATE_FMT)
+            except:
+                pass
         finally:
-            rtn_dict['start_date'] = _start_date
-            filters = filters & Q(recorded_at__gt=_start_date)
+            if _start_date:
+                rtn_dict['start_date'] = _start_date
+                filters = filters & MongoQuery(recorded_at__gt=_start_date)
 
     if 'end_date' in data_dict:
+        _end_date = None
         try:
             _end_date = datetime.strptime(data_dict['end_date'], DATE_FMT)
         except ValueError:
-            _end_date = datetime.strptime(data_dict['end_date'] +
-                                          " 23:59:59", DATE_FMT)
+            try:
+                _end_date = datetime.strptime(data_dict['end_date'] +
+                                              " 23:59:59", DATE_FMT)
+            except:
+                pass
         finally:
-            rtn_dict['end_date'] = _end_date
-            filters = filters & Q(recorded_at__lt=_end_date)
+            if _end_date:
+                rtn_dict['end_date'] = _end_date
+                filters = filters & MongoQuery(recorded_at__lt=_end_date)
 
     log.debug(filters)
     _activities = Activity.objects(filters).sum(value)
