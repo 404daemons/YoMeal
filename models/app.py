@@ -32,6 +32,10 @@ def add_activity():
     if not isinstance(data_dict, dict):
         return jsonify(status=400, message="Invalid payload data. Data "
                                            "should be single JSON", data=[])
+
+    if not data_dict:
+        return jsonify(status=400, message="Invalid payload data. Please "
+                                           "send the valid data.", data=[])
     _items = list()
     for item in data_dict['items']:
         _new_activity = Activity()
