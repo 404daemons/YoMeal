@@ -106,7 +106,37 @@ Date Format: `"%Y-%m-%d %H:%M:%S"` or `"%Y-%m-%d"`
 ```json
 {
     "data": {
-        "calorie": 120,
+        "details": [
+            {
+                "_id": {
+                    "day": 15,
+                    "month": 2,
+                    "year": 2020
+                },
+                "activities": [
+                    {
+                        "calorie": 10,
+                        "item": "Apple",
+                        "protein": 10,
+                        "sugar": 0
+                    },
+                    {
+                        "calorie": 10,
+                        "item": "Banana",
+                        "protein": 10,
+                        "sugar": 0
+                    }
+                ],
+                "count": 2,
+                "food_items": [
+                    "Apple",
+                    "Banana"
+                ],
+                "total_calorie": 20,
+                "total_protein": 20
+            }
+        ],
+        "end_date": "Sun, 16 Feb 2020 23:59:59 GMT",
         "phone_no": 1
     },
     "message": "Success",

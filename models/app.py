@@ -1,9 +1,9 @@
-import datetime
 import json
 import logging
 import os
 
 from db_models import Activity
+from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_mongoengine import MongoEngine
 from mongoengine.queryset.visitor import Q as MongoQuery
@@ -90,8 +90,8 @@ def get_activity(ph_no):
     return jsonify(status=200, message=msg, data=_activities.to_json())
 
 
-@app.route('/activity/<int:ph_no>/<value>', methods=['GET'])
-def get_summary_activity(ph_no, value):
+@app.route('/activity/<int:ph_no>', methods=['GET'])
+def get_summary_activity(ph_no):
     data_dict = request.get_json()
     rtn_dict = dict()
     filters = MongoQuery(phone_no=ph_no)
@@ -126,12 +126,31 @@ def get_summary_activity(ph_no, value):
                 filters = filters & MongoQuery(recorded_at__lt=_end_date)
 
     log.debug(filters)
-    _activities = Activity.objects(filters).sum(value)
+    _activities = Activity.objects(filters).aggregate(
+            {"$group": {
+                "_id": {
+                    "day": {"$dayOfMonth": "$recorded_at"},
+                    "month": {"$month": "$recorded_at"},
+                    "year": {"$year": "$recorded_at"}},
+                "activities": {
+                    "$push": {
+                        "item": "$item",
+                        "calorie": "$calorie",
+                        "protein": "$protein",
+                        "sugar": "$sugar"
+                    }
+                },
+                "food_items": {"$push": "$item"},
+                "total_calorie": {"$sum": "$calorie"},
+                "total_protein": {"$sum": "$protein"},
+                "count": {"$sum": 1}
+            }
+            }
+    )
     rtn_dict['phone_no'] = ph_no
-    rtn_dict[value] = _activities
+    rtn_dict['details'] = list(_activities)
     log.info(rtn_dict)
     return jsonify(status=200, message="Success", data=rtn_dict)
-
 
 if __name__ == "__main__":
     # Added as default config for now. Will change it in future.
