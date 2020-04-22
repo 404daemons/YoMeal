@@ -1,0 +1,40 @@
+version: '3'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181"
+    hostname: zookeeper
+  kafka:
+    image: wurstmeister/kafka
+    command: [start-kafka.sh]
+    ports:
+      - "9092:9092"
+    hostname: kafka
+    environment:
+      # TODO: update topics/patitions/replicas
+      KAFKA_CREATE_TOPICS: "nutritions:1:1,routine:1:1,retrieval:1:1,unknown:1:1" # topic:partition:replicas
+      KAFKA_ADVERTISED_HOST_NAME: kafka # docker-machine ip
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_PORT: 9092
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - "zookeeper"
+  yomeal:
+    restart: always
+    build:
+      context: ./yomeal
+      args:
+        - IMAGE_VERSION=3.7
+    environment:
+      - FLASK_ENV=development
+    ports:
+        - "5000:5000"
+    # volumes:
+    #     - ./yomeal:/code
+    depends_on:
+        - redis
+        # - kafka
+  redis:
+      image: redis
